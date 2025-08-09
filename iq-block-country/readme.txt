@@ -4,7 +4,7 @@ Donate link: https://webence.net/donate
 Tags: Block Spam, Block Countries, Geoblocking, Ban countries, Block
 Requires at least: 3.5.2
 Tested up to: 6.8.2
-Stable tag: 1.2.25
+Stable tag: 1.2.26
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 7.4
@@ -278,6 +278,9 @@ MaxMind Privacy Policy: https://www.maxmind.com/en/privacy-policy
 
 
 == Changelog ==
+
+= 1.2.26 =
+* Fix: Plugin was no longer compatible with PHP 7
 
 = 1.2.25 =
 * Changed: Fixed some PHP 8.1 compability errors

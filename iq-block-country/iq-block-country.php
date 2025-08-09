@@ -2,7 +2,7 @@
 /*
 Plugin Name: iQ Block Country
 Plugin URI: https://webence.net/
-Version: 1.2.25
+Version: 1.2.26
 Author: Pascal
 Author URI: https://webence.net/
 Description: Block visitors from visiting your website and backend website based on which country their IP address is from. The Maxmind GeoIP lite database is used for looking up from which country an ip address is from.
@@ -107,7 +107,9 @@ function iqblockcountry_get_ipaddress()
     }
      
     // Get first ip if ip_address contains multiple addresses
-    if (str_contains($iqbc_ip_address, ',')) { $iqbc_ips = explode(',', $iqbc_ip_address); } else { $iqbc_ips[0] = ""; }
+    $multiipcheck = strpos($iqbc_ip_address,",");
+    if ($multiipcheck == FALSE)    { $iqbc_ips[0] = ""; } 
+    else   {$iqbc_ips = explode(',', $iqbc_ip_address); }    
 
     if (iqblockcountry_is_valid_ipv4(trim($iqbc_ips[0])) || iqblockcountry_is_valid_ipv6(trim($iqbc_ips[0]))) {
         $iqbc_ip_address = filter_var($iqbc_ips[0],FILTER_VALIDATE_IP);
