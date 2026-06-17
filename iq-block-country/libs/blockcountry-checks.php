@@ -568,7 +568,7 @@ function iqblockcountry_is_login_page()
         }
     } 
    
-    if (stripos( $_SERVER['REQUEST_URI'], 'wp-login.php' ) !== false && ($GLOBALS['pagenow'] === 'wp-login.php' || $_SERVER['PHP_SELF'] === '/wp-login.php')) { $iqbc_found = true; }
+    if (stripos( $_SERVER['REQUEST_URI'], 'wp-login.php' ) !== false && ((isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'wp-login.php') || $_SERVER['PHP_SELF'] === '/wp-login.php')) { $iqbc_found = true; }
     elseif ($iqbc_pos2 !== false) { $iqbc_found = true; 
     }
   
