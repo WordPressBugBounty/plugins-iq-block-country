@@ -3,8 +3,8 @@ Contributors: iqpascal
 Donate link: https://webence.net/donate
 Tags: Block Spam, Block Countries, Geoblocking, Ban countries, Block
 Requires at least: 3.5.2
-Tested up to: 7.0
-Stable tag: 1.2.28
+Tested up to: 7.1
+Stable tag: 1.2.29
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 7.4
@@ -278,6 +278,9 @@ MaxMind Privacy Policy: https://www.maxmind.com/en/privacy-policy
 
 
 == Changelog ==
+
+= 1.2.29 =
+* Changed: Rewrite of how users IP address is retrieved to fix possible vulnerability of websites behind a proxy/cache. Thanks to Daniel Ruf's and Nguyen Huu
 
 = 1.2.28 =
 * Fix: Prevent rare occassion $pagenow can be bypassed in PHP 8.2

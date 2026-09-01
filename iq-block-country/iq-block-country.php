@@ -2,7 +2,7 @@
 /*
 Plugin Name: iQ Block Country
 Plugin URI: https://webence.net/
-Version: 1.2.28
+Version: 1.2.29
 Author: Pascal
 Author URI: https://webence.net/
 Description: Block visitors from visiting your website and backend website based on which country their IP address is from. The Maxmind GeoIP lite database is used for looking up from which country an ip address is from.
@@ -88,38 +88,32 @@ function iqblockcountry_get_ipaddress()
     $iqbc_server_address = "";
     if(isset($_SERVER['SERVER_ADDR']) && (rest_is_ip_address($_SERVER['SERVER_ADDR']))) { $iqbc_server_address = filter_var($_SERVER['SERVER_ADDR'],FILTER_VALIDATE_IP); } 
     elseif(array_key_exists('LOCAL_ADDR', $_SERVER) && (rest_is_ip_address($_SERVER['LOCAL_ADDR']))) { $iqbc_server_address = filter_var($_SERVER['LOCAL_ADDR'],FILTER_VALIDATE_IP); }
+
     
-    if (isset($_SERVER['HTTP_CF_CONNECTING_IP']) && rest_is_ip_address($_SERVER['HTTP_CF_CONNECTING_IP'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_CF_CONNECTING_IP'],FILTER_VALIDATE_IP); }
-    elseif (isset($_SERVER['HTTP_X_REAL_IP']) && rest_is_ip_address($_SERVER['HTTP_X_REAL_IP'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_X_REAL_IP'],FILTER_VALIDATE_IP); } 
-    elseif (isset($_SERVER['HTTP_X_SUCURI_CLIENTIP']) && rest_is_ip_address($_SERVER['HTTP_X_SUCURI_CLIENTIP'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_X_SUCURI_CLIENTIP'],FILTER_VALIDATE_IP); }
-    elseif (isset($_SERVER['HTTP_INCAP_CLIENT_IP']) && rest_is_ip_address($_SERVER['HTTP_INCAP_CLIENT_IP'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_INCAP_CLIENT_IP'],FILTER_VALIDATE_IP); }
-    elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && rest_is_ip_address($_SERVER['HTTP_X_FORWARDED_FOR'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_X_FORWARDED_FOR'],FILTER_VALIDATE_IP); } 
-    elseif (isset($_SERVER['HTTP_X_FORWARDED']) && rest_is_ip_address($_SERVER['HTTP_X_FORWARDED'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_X_FORWARDED'],FILTER_VALIDATE_IP); }
-    elseif (isset($_SERVER['HTTP_CLIENT_IP']) && rest_is_ip_address($_SERVER['HTTP_CLIENT_IP'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_CLIENT_IP'],FILTER_VALIDATE_IP); }
-    elseif (isset($_SERVER['HTTP_FORWARDED']) && rest_is_ip_address($_SERVER['HTTP_FORWARDED'])) { $iqbc_ip_address = filter_var($_SERVER['HTTP_FORWARDED'],FILTER_VALIDATE_IP); }
-    elseif (isset($_SERVER['REMOTE_ADDR']) && rest_is_ip_address($_SERVER['REMOTE_ADDR'])) { $iqbc_ip_address = filter_var($_SERVER['REMOTE_ADDR'],FILTER_VALIDATE_IP); }
-
     $iqbc_ipoverride = get_option('blockcountry_ipoverride');
-    if (isset($iqbc_ipoverride) && (!empty($iqbc_ipoverride) && ($iqbc_ipoverride != "NONE") )) {
-        if (isset($_SERVER[$iqbc_ipoverride]) && !empty($_SERVER[$iqbc_ipoverride])) {
-            if (iqblockcountry_is_valid_ipv4($_SERVER[$iqbc_ipoverride]) || iqblockcountry_is_valid_ipv6($_SERVER[$iqbc_ipoverride])) { $iqbc_ip_address = filter_var($_SERVER[$iqbc_ipoverride],FILTER_VALIDATE_IP);}
+    if ($iqbc_ipoverride == "NONE" || empty($iqbc_ipoverride)) { $iqbc_ipoverride = "REMOTE_ADDR"; }
+    
+    if (isset($iqbc_ipoverride) && (!empty($iqbc_ipoverride) )) {
+        if (!isset($_SERVER[$iqbc_ipoverride]) || empty($_SERVER[$iqbc_ipoverride])) {
+            $iqbc_ipoverride = "REMOTE_ADDR";
         }
+            $multiipcheck = strpos($_SERVER[$iqbc_ipoverride],",");
+            if ($multiipcheck === FALSE)    { $iqbc_ips[0] = $_SERVER[$iqbc_ipoverride]; } 
+            else   {$iqbc_ips = array_map('trim',explode(',', $_SERVER[$iqbc_ipoverride])); }    
+            
+            if (iqblockcountry_is_valid_ipv4(end($iqbc_ips)) || iqblockcountry_is_valid_ipv6(end($iqbc_ips))) { $iqbc_ip_address = filter_var(end($iqbc_ips),FILTER_VALIDATE_IP);}
+            else { 
+                if (isset($_SERVER['REMOTE_ADDR']) && rest_is_ip_address($_SERVER['REMOTE_ADDR'])  ) { $iqbc_ip_address = filter_var($_SERVER['REMOTE_ADDR'],FILTER_VALIDATE_IP); }
+            }
     }
-     
-    // Get first ip if ip_address contains multiple addresses
-    $multiipcheck = strpos($iqbc_ip_address,",");
-    if ($multiipcheck == FALSE)    { $iqbc_ips[0] = ""; } 
-    else   {$iqbc_ips = explode(',', $iqbc_ip_address); }    
-
-    if (iqblockcountry_is_valid_ipv4(trim($iqbc_ips[0])) || iqblockcountry_is_valid_ipv6(trim($iqbc_ips[0]))) {
-        $iqbc_ip_address = filter_var($iqbc_ips[0],FILTER_VALIDATE_IP);
-    }
+    else { $iqbc_ip_address = "0.0.0.0"; }
+    
     if ($iqbc_ip_address == $iqbc_server_address) {
         if (isset($_SERVER['REMOTE_ADDR']) && rest_is_ip_address($_SERVER['REMOTE_ADDR'])  ) { $iqbc_ip_address = filter_var($_SERVER['REMOTE_ADDR'],FILTER_VALIDATE_IP); }
         else { $iqbc_ip_address = "0.0.0.0"; }
-
     }
-    return $iqbc_ip_address;
+
+        return $iqbc_ip_address;
 }
 
 
@@ -160,7 +154,7 @@ define("GEOIPAPICHECKUSAGEURL", "https://eu.geoip.webence.nl/geoipapi-usage.php"
 define("ADMINAPICHECKURL", "https://tracking.webence.nl/adminapi-keycheck.php");
 define("GEOIPAPITOKEN", "Y2tfOWFiMzQ5ZGNkNTNjNWUyNDMxZmMwOWMzZjc4MGEzYWExODc5YmEyYzpjc182YTc4Mjc5NWIzMDNhYmNmZmZiOWRhZmJiYjg1Yzc1NTUxMDBhY2Ew");
 define("GEOIPHASH","abd7c61d112af8699730a2c21550e7a5649feaf83471075c825fb2de90f53196");
-define("IQVERSION", "1.2.24a");
+define("IQVERSION", "1.2.29");
 define("IQDBVERSION", "124");
 define("IQBCPLUGINPATH", plugin_dir_path(__FILE__)); 
 
